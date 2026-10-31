@@ -1,0 +1,92 @@
+# DoorCam v2 settings. Relative paths are relative to this folder.
+
+camera:
+  device: 0             # /dev/video0
+  width: 640
+  height: 480
+  fps: 30
+  fourcc: ""            # set to "MJPG" if the webcam can't do 640x480 at 30 fps
+
+display:
+  enabled: true
+  fullscreen: true
+  wait_for_display_s: 120
+
+detection:
+  network: ssd-mobilenet-v2
+  threshold: 0.5
+  # A person only counts as "major" (starts an event clip) when their box is
+  # at least this fraction of the frame height and they stay this long.
+  min_height_frac: 0.25
+  min_presence_s: 1.0
+
+faces:
+  enabled: true
+  known_dir: known_faces
+  model: cnn            # cnn = GPU (dlib built with CUDA), hog = CPU only
+  upsample: 1           # raise to 2 if faces are small/far from the camera
+  tolerance: 0.5        # lower = stricter matching, fewer false names
+  recheck_known_s: 3.0  # how often to re-confirm someone already named
+  recheck_unknown_s: 0.5
+  min_person_height_px: 120
+  save_unknown: true    # save crops of unrecognised faces so you can enroll them
+
+tracking:
+  iou_match: 0.3
+  max_missing_s: 1.5
+
+storage:
+  footage_dir: /footage
+  require_mount: true   # never record onto the boot card if the USB card is missing
+  keep_business_days: 7
+  min_free_gb: 1.0
+  events_max_gb: 3.0
+  cleanup_every_s: 600
+
+recording:
+  encoder: auto         # auto | nvv4l2h264enc | x264enc | opencv
+  continuous:
+    enabled: true
+    fps: 10
+    bitrate_kbps: 250
+    timestamp: true
+  events:
+    enabled: true
+    fps: 15
+    bitrate_kbps: 1500
+    pre_roll_s: 5
+    post_roll_s: 10
+    max_clip_s: 600
+
+time:
+  require_sync: true
+  sync_flag: /run/doorcam-time-ok   # written by doorcam-timefix.service
+
+logging:
+  dir: logs
+  level: INFO
+
+liveness:
+  actions: 2            # actions per attempt, picked at random (always at least one face action)
+  pool: [blink_twice, turn_left, turn_right, thumbs_up, open_palm,
+         one_finger, two_fingers, three_fingers, fist]
+  face_window_s: 3.0    # time allowed per face action
+  hand_window_s: 4.0    # time allowed per hand action
+  hold_s: 0.4           # a turn or gesture must be held this long
+  wrong_hold_s: 0.8     # holding a different action this long fails the attempt
+  blink_ratio: 0.65     # eye counts as closed below this fraction of its open size
+  turn_yaw: 0.25        # how far the head must turn (raise if turns pass too easily)
+  camera_mirrored: false
+  min_identity_frames: 5  # frames matched to the card owner needed over the whole attempt
+  recognise_frames: 3   # frames matched before "Hi <name>" and the actions start
+  settle_timeout_s: 6.0 # time to look at the camera and be recognised
+
+verify:
+  model: models/w600k_r50.onnx   # InsightFace ArcFace (non-commercial research licence)
+  db_dir: faces_db
+  accept: 0.50          # match score at or above: the card owner (raise = stricter)
+  reject: 0.25          # below: a different person, the attempt fails at once
+  min_eye_px: 40        # face must be at least this big (distance between the eyes)
+  max_yaw: 0.35         # only frames facing the camera are judged
+  min_sharpness: 40
+  brightness: [50, 210]

@@ -1,0 +1,13 @@
+# personal data: never publish faces or card IDs
+faces_db/
+known_faces/
+users.db
+prompts/hello_*.wav
+snapshots/
+logs/
+# downloaded models (large; see scripts/download_models.py)
+models/
+# Python
+__pycache__/
+*.pyc
+.venv/

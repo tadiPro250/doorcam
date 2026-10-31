@@ -1,0 +1,11 @@
+[Unit]
+Description=DoorCam clock sync (NTP with HTTPS fallback)
+Wants=network-online.target
+After=network-online.target chrony.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/doorcam-timefix.sh
+
+[Install]
+WantedBy=multi-user.target

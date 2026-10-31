@@ -1,0 +1,7 @@
+# Laptop / PC (Python 3.11): admin app, face registration, entry demo
+numpy<2
+opencv-python
+pyyaml
+onnxruntime
+mediapipe==0.10.14
+piper-tts
